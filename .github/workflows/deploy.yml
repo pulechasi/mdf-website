@@ -1,4 +1,4 @@
-name: Deploy to Production
+name: Deploy to MDF Production Server
 
 on:
   push:
@@ -16,14 +16,10 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, gd
         coverage: none
 
-    - name: Validate composer.json and composer.lock
-      run: composer validate --strict
-
     - name: Cache Composer packages
-      id: composer-cache
       uses: actions/cache@v3
       with:
         path: vendor
@@ -41,13 +37,7 @@ jobs:
     - name: Generate application key
       run: php artisan key:generate
 
-    - name: Cache configuration
-      run: |
-        php artisan config:cache
-        php artisan route:cache
-        php artisan view:cache
-
-    - name: Install Node.js
+    - name: Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
@@ -56,30 +46,34 @@ jobs:
     - name: Install npm dependencies
       run: npm ci
 
-    - name: Build assets
+    - name: Build assets with Laravel Mix
       run: npm run build
 
-    - name: Deploy to server
+    - name: Deploy to MDF Server
       uses: appleboy/scp-action@v0.1.4
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
+        host: mdf.gov.mw
+        username: mdf
         key: ${{ secrets.SERVER_SSH_KEY }}
         source: ".,!node_modules,!vendor,!/.git"
         target: "/home/mdf/public_html"
         strip_components: 1
 
-    - name: Run deployment commands on server
+    - name: Run deployment commands on MDF server
       uses: appleboy/ssh-action@v1.0.0
       with:
-        host: ${{ secrets.SERVER_HOST }}
-        username: ${{ secrets.SERVER_USER }}
+        host: mdf.gov.mw
+        username: mdf
         key: ${{ secrets.SERVER_SSH_KEY }}
         script: |
           cd /home/mdf/public_html
 
-          # Install production dependencies (in case scp missed vendor)
+          # Install production dependencies
           composer install --no-dev --optimize-autoloader --no-interaction
+
+          # Build assets on server (in case scp missed them)
+          npm ci --production
+          npm run build
 
           # Run migrations
           php artisan migrate --force
@@ -90,11 +84,10 @@ jobs:
           php artisan view:cache
 
           # Set permissions
-          sudo chown -R mdf:www-data /home/mdf/public_html
-          sudo chmod -R 755 storage
-          sudo chmod -R 755 bootstrap/cache
+          chmod -R 755 storage
+          chmod -R 755 bootstrap/cache
 
-          # Reload PHP-FPM (adjust version as needed)
-          sudo systemctl reload php8.2-fpm
+          # Clear any OPcache
+          sudo service php8.2-fpm reload
 
-          echo "Deployment completed successfully!"
+          echo "✅ Deployment to mdf.gov.mw completed successfully!"
