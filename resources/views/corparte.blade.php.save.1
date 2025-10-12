@@ -1,0 +1,112 @@
+@include('includes.header')
+
+<body data-bs-spy="scroll" data-bs-target=".navbar" data-bs-offset="70" class="bg-light">
+
+
+    <!-- Jumbotron -->
+    <div class="py-5" style="
+        background-image: linear-gradient(
+            rgba(0, 0, 0, 0.7),
+            rgba(0, 0, 0, 0.1)
+          ),
+          url(app/img/army1.jpg);
+          background-size: cover;
+        height: 260px;
+      ">
+        <div class="container">
+            <div class="row">
+                <h1 class="text-white py-5 display-4">Defence Industry and Corporate Services</h1>
+            </div>
+        </div>
+    </div>
+    <!-- Jumbotron -->
+
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-2 g-4 py-5">
+            <div class="col">
+                <div class="card h-100">
+                    <h5 class="card-title py-3">ENGINEERS CONSTRUCTION COMPANY LIMITED</h5>
+                    <img src="{{ asset('app/img/construction.jpg') }}" class="card-img-top h-60" alt="...">
+                    <div class="card-body">
+
+                        <p class="card-text">• Started as the Engineers Battalion to support fighting units <br>
+                            • Commercialised and registered as Engineers Construction Company<br>
+                            • Has worked on several construction works like the road in Area 43, Lilongwe and Cobbe
+                            Barracks Roads in Zomba<br>
+                            • Currently working on Mwanza - Tsangano Road in Ntcheu
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <h5 class="card-title py-3">
+                        AGRICULTURE PRODUCTION COMPANY LIMITED
+                    </h5>
+                    <img src={{ asset('app/img/construction.jpg') }} class="card-img-top" alt="...">
+                    <div class="card-body">
+
+                        <p class="card-text">
+                            • Produce and supply food stuffs/ rations for service members and to be self-sustaining <br>
+                            • Ease pressure on Budgetary allocation for the military specifically on rations <br>
+                            • Registered for purposes of commercializing the Agricultural Production Unit <br>
+                            • Choma Farm in Mzuzu, Kalewa Goat Farm in Nkhota-Kota, Kasungu Crop Farm in Kasungu, and
+                            Gada Farm in Mchinji.
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <h5 class="card-title py-3">VETERANS AFFAIRS DEPARTMENT</h5>
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+
+                        <p class="card-text">
+                            • Falls under the Directorate of Human Resource Management and Development <br>
+                            • Responsible for persons who served honourably on active duty (Veterans) <br>
+                            • Coordinates with civilian or military organisations on the welfare of the veterans
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div class="card h-100">
+                    <h5 class="card-title py-3">MALAWI DEFENCE FORCE MUSEUMS</h5>
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+
+                        <p class="card-text">
+                            • Based in Zomba
+                            and was established to preserve Malawi Defence Force history <br>
+                            • Displays military hardware <br>
+                            • Provides an opportunity for Civil-Military interaction <br>
+                            • Can be used for academic purposes and tourist attraction
+
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col">
+                <div class="card h-100">
+                    <h5 class="card-title py-3">MSILIKALI SAVINGS AND CREDIT COOPERATIVE (MSACCO)</h5>
+                    <img src="..." class="card-img-top" alt="...">
+                    <div class="card-body">
+
+                        <p class="card-text"> Established to enhance service members economic capacity and empowering
+                            them to be more capable to carry out economic ventures</p>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+    @include('includes.footer')

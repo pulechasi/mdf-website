@@ -1,0 +1,101 @@
+@extends('layouts.app')
+
+@section('content')
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+
+           <div class="card">
+                <div class="card-body">
+                    <div class="float-left">
+                        <a href="{{ route('posts.create') }}" class="btn btn-primary btn-xs mb-2">Add New Post</a>
+                        @if(Auth::user()->role)
+                            <a href="{{ route('posts.trashed') }}" class="btn 
+                        @endif
+                    </div>
+                    <div class="float-right">
+
+                            <div class="mx-auto pull-right">
+
+                                    <form action="{{ route('posts') }}" method="GET" role="search">
+
+                                        <div class="input-group">
+
+                                            <input type="text" class="form-control" name="term" placeholder="Search posts" id="term">
+                                            <a href="{{ route('posts') }}">
+                                                <span class="input-group-btn mb-1">
+                                                    <button class="btn btn-primary" type="submit" title="Search posts">
+                                                        <span class="fas fa-search"></span>
+                                                    </button>
+                                                </span>
+                                            </a>
+
+                                        </div>
+                                    </form>
+
+                            </div>
+
+                    </div>
+
+
+
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Image</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                           @if ($posts->count() > 0)
+                             @foreach ($posts as $post )
+                                    <tr>
+                                        <td>
+                                            <img src="{{ asset($post->image) }}" alt="{{ $post->title }}" height="50" width="50"
+                                    style="border-radius: 70%">
+                                        </td>
+                                        <td>{{ $post->title }}</td>
+
+                                        <td>{{ $post->category }}</td>
+                                        <td>
+                                            <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-info btn-xs mb-1">
+                                                <i class="fa fa-edit"></i> Edit</a>
+                                            @if (Auth::user()->role)
+                                                <a href="{{ route('posts.delete',$post->id) }}" class="btn btn-warning btn-xs mb-1">
+                                                <i class="fa fa-trash"></i> Trash</a>
+
+                                            @endif
+                                        </td>
+
+                                    </tr>
+
+                            @endforeach
+
+                            @else
+                              <tr>
+                                <td colspan="5" class="text text-danger text-center">
+                                    No available posts!
+                                </td>
+                              </tr>
+                            @endif
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+                {!! $posts->links() !!}
+           </div>
+        </div>
+
+    </div>
+</div>
+
+@endsection
+
+
+
+
