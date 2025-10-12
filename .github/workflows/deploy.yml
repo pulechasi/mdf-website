@@ -1,93 +1,62 @@
-name: Deploy to MDF Production Server
+name: Deploy to Production
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.2'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, bcmath, gd
-        coverage: none
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd /home/mdf/public_html
 
-    - name: Cache Composer packages
-      uses: actions/cache@v3
-      with:
-        path: vendor
-        key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-php-
+            # Enable maintenance mode
+            php artisan down || true
 
-    - name: Install Composer dependencies
-      run: composer install --prefer-dist --no-dev --optimize-autoloader
+            # Pull latest changes
+            git pull origin main
 
-    - name: Create environment file
-      run: |
-        echo "${{ secrets.ENV_FILE }}" > .env
+            # Install/Update dependencies
+            composer install --no-dev --optimize-autoloader --no-interaction
 
-    - name: Generate application key
-      run: php artisan key:generate
+            # Run migrations
+            php artisan migrate --force
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '18'
-        cache: 'npm'
+            # Clear all caches first
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
 
-    - name: Install npm dependencies
-      run: npm ci
+            # Then optimize
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan optimize
 
-    - name: Build assets with Laravel Mix
-      run: npm run build
+            # Build frontend assets if needed
+            npm ci --production
+            npm run build
 
-    - name: Deploy to MDF Server
-      uses: appleboy/scp-action@v0.1.4
-      with:
-        host: mdf.gov.mw
-        username: mdf
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        source: ".,!node_modules,!vendor,!/.git"
-        target: "/home/mdf/public_html"
-        strip_components: 1
+            # Restart queue workers if you use them
+            php artisan queue:restart
 
-    - name: Run deployment commands on MDF server
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: mdf.gov.mw
-        username: mdf
-        key: ${{ secrets.SERVER_SSH_KEY }}
-        script: |
-          cd /home/mdf/public_html
+            # Set permissions
+            chmod -R 775 storage bootstrap/cache
+            chown -R www-data:www-data storage bootstrap/cache
 
-          # Install production dependencies
-          composer install --no-dev --optimize-autoloader --no-interaction
-
-          # Build assets on server (in case scp missed them)
-          npm ci --production
-          npm run build
-
-          # Run migrations
-          php artisan migrate --force
-
-          # Cache configuration
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache
-
-          # Set permissions
-          chmod -R 755 storage
-          chmod -R 755 bootstrap/cache
-
-          # Clear any OPcache
-          sudo service php8.2-fpm reload
-
-          echo "✅ Deployment to mdf.gov.mw completed successfully!"
+            # Disable maintenance mode
+            php artisan up
