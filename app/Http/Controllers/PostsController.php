@@ -21,35 +21,34 @@ class PostsController extends Controller
     public function index(Request $request)
     {
         //
-         if (Auth::user()->role) {
+        if (Auth::user()->role) {
 
-             //$posts = Post::latest()->paginate(4);
-             $posts = Post::where([
+            //$posts = Post::latest()->paginate(4);
+            $posts = Post::where([
                 ['title', '!=', NULL],
-                [function($query) use ($request){
-                    if(($term = $request->term)){
-                        $query->orWhere('title', 'LIKE', '%'.$term.'%')->get();
+                [function ($query) use ($request) {
+                    if (($term = $request->term)) {
+                        $query->orWhere('title', 'LIKE', '%' . $term . '%')->get();
                     }
                 }]
-             ])->orderBy('id', 'desc')
-             ->paginate(5);
-             return view('posts.index', compact('posts'))
-             ->with('i', (request()->input('page', 1)- 1)* 5);
-
+            ])->orderBy('id', 'desc')
+                ->paginate(5);
+            return view('posts.index', compact('posts'))
+                ->with('i', (request()->input('page', 1) - 1) * 5);
         }
 
         $posts = Post::where([
             ['title', '!=', NULL],
-            ['user_id','=', Auth::user()->id],
-            [function($query) use ($request){
-                if(($term = $request->term)){
-                    $query->orWhere('title', 'LIKE', '%'.$term.'%')->get();
+            ['user_id', '=', Auth::user()->id],
+            [function ($query) use ($request) {
+                if (($term = $request->term)) {
+                    $query->orWhere('title', 'LIKE', '%' . $term . '%')->get();
                 }
             }]
-         ])->orderBy('id', 'desc')
-         ->paginate(5);
-         return view('posts.index', compact('posts'))
-         ->with('i', (request()->input('page', 1)- 1)* 5);
+        ])->orderBy('id', 'desc')
+            ->paginate(5);
+        return view('posts.index', compact('posts'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
 
         //  $posts = Post::where('user_id',Auth::user()->id)->paginate(4);
         //  return view('posts.index', compact('posts'));
@@ -93,7 +92,7 @@ class PostsController extends Controller
 
 
         $image = $request->image;
-        $image_new_name = time().$image->getClientOriginalName();
+        $image_new_name = time() . $image->getClientOriginalName();
         $image->move('uploads/posts/', $image_new_name);
 
         Post::create([
@@ -103,7 +102,7 @@ class PostsController extends Controller
             'event_date' => $request->event_date,
             'user_id' => Auth::user()->id,
             'slug' => str_slug($request->title),
-            'image' => 'uploads/posts/'.$image_new_name,
+            'image' => 'uploads/posts/' . $image_new_name,
         ]);
 
         return redirect()->route('posts')->with('status', 'New post created!');
@@ -131,7 +130,6 @@ class PostsController extends Controller
         //
         $posts = Post::find($id);
         return view('posts.edit', compact('posts'));
-
     }
 
     /**
@@ -151,12 +149,12 @@ class PostsController extends Controller
         ]);
         $posts = Post::find($id);
 
-        if($request->hasFile('image')){
+        if ($request->hasFile('image')) {
             $image = $request->image;
-            $image_new_name = time().$image->getClientOriginalName();
-            $image->move('uploads/posts/',$image_new_name);
+            $image_new_name = time() . $image->getClientOriginalName();
+            $image->move('uploads/posts/', $image_new_name);
 
-            $posts->image = 'uploads/posts/'.$image_new_name;
+            $posts->image = 'uploads/posts/' . $image_new_name;
         }
 
         $posts->title = $request->title;
@@ -183,27 +181,28 @@ class PostsController extends Controller
         $posts->delete();
 
         return redirect()->route('posts')->with('status', 'Post trashed');
-
     }
     // Trashed posts
-    public function trash(){
+    public function trash()
+    {
 
-        $posts = Post::onlyTrashed()->get();
-
+        $posts = Post::onlyTrashed()->paginate(10); // Change from get() to paginate(10)
         return view('posts.trashed', compact('posts'));
     }
     // permanantly delete posts
-    public function delete($id){
- 
+    public function delete($id)
+    {
+
 
         $post = Post::onlyTrashed()->where('id', $id)->first();
 
         $post->forceDelete();
 
         return redirect()->back()->with('status', 'Post deleted permanently!');
-     }
+    }
     // restore deleted posts
-    public function restore($id){
+    public function restore($id)
+    {
 
         $post = Post::onlyTrashed()->where('id', $id)->first();
 

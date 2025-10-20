@@ -20,35 +20,33 @@ class AdvertsController extends Controller
     public function index(Request $request)
     {
         //
-        if(Auth::user()->role){
+        if (Auth::user()->role) {
             $adverts = Advert::where([
                 ['title', '!=', NULL],
                 ['status', '=', 1],
-                [function($query) use ($request){
-                    if(($term = $request->term)){
-                        $query->orWhere('title', 'LIKE', '%'.$term.'%')->get();
+                [function ($query) use ($request) {
+                    if (($term = $request->term)) {
+                        $query->orWhere('title', 'LIKE', '%' . $term . '%')->get();
                     }
                 }]
-             ])->orderBy('id', 'desc')
-             ->paginate(5);
-             return view('adverts.index', compact('adverts'))
-             ->with('i', (request()->input('page', 1)- 1)* 5);
-
+            ])->orderBy('id', 'desc')
+                ->paginate(5);
+            return view('adverts.index', compact('adverts'))
+                ->with('i', (request()->input('page', 1) - 1) * 5);
         }
-         $adverts = Advert::where([
+        $adverts = Advert::where([
             ['title', '!=', NULL],
             ['status', '=', 1],
             ['user_id', '=', Auth::user()->id],
-            [function($query) use ($request){
-                if(($term = $request->term)){
-                    $query->orWhere('title', 'LIKE', '%'.$term.'%')->get();
+            [function ($query) use ($request) {
+                if (($term = $request->term)) {
+                    $query->orWhere('title', 'LIKE', '%' . $term . '%')->get();
                 }
             }]
-         ])->orderBy('id', 'desc')
-         ->paginate(5);
-         return view('adverts.index', compact('adverts'))
-         ->with('i', (request()->input('page', 1)- 1)* 5);
-
+        ])->orderBy('id', 'desc')
+            ->paginate(5);
+        return view('adverts.index', compact('adverts'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
     }
 
     /**
@@ -70,17 +68,16 @@ class AdvertsController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'title' => 'required',
             'description' => 'required',
-            'file' => 'required|mimes:pdf|12288',
+            'file' => 'required|mimes:pdf|max:12288', // Changed from |12288 to |max:12288
             'advert_type' => 'required',
             'due_date' => 'required',
         ]);
 
         $file = $request->file;
-        $file_new_name = time().$file->getClientOriginalName();
+        $file_new_name = time() . $file->getClientOriginalName();
         $file->move('uploads/adverts/', $file_new_name);
 
         Advert::create([
@@ -88,7 +85,7 @@ class AdvertsController extends Controller
             'slug' => str_slug($request->title),
             'user_id' => Auth::user()->id,
             'description' => $request->description,
-            'file' => 'uploads/adverts/'.$file_new_name,
+            'file' => 'uploads/adverts/' . $file_new_name,
             'advert_type' => $request->advert_type,
             'due_date' => $request->due_date,
         ]);
@@ -132,20 +129,20 @@ class AdvertsController extends Controller
     {
         //
         $request->validate([
-           'title' => 'required',
-           'description' => 'required',
-           'advert_type' => 'required',
-           'due_date'  => 'required',
+            'title' => 'required',
+            'description' => 'required',
+            'advert_type' => 'required',
+            'due_date'  => 'required',
         ]);
 
         $advert = Advert::find($id);
 
-        if($request->hasFile('file')){
+        if ($request->hasFile('file')) {
             $file = $request->file;
-            $file_new_name = time().$file->getClientOriginalName();
+            $file_new_name = time() . $file->getClientOriginalName();
             $file->move('uploads/adverts/', $file_new_name);
 
-            $advert->file = 'uploads/adverts/'.$file_new_name;
+            $advert->file = 'uploads/adverts/' . $file_new_name;
         }
 
         $advert->title = $request->title;
@@ -156,7 +153,6 @@ class AdvertsController extends Controller
         $advert->save();
 
         return redirect()->back()->with('status', 'Advert has been updated!');
-
     }
 
     /**
@@ -175,28 +171,29 @@ class AdvertsController extends Controller
         return redirect()->route('adverts')->with('status', 'Advert has been deleted!');
     }
 
-    public function unpublished(){
-        $adverts = Advert::latest()->where('status',0)->paginate(5);
+    public function unpublished()
+    {
+        $adverts = Advert::latest()->where('status', 0)->paginate(5);
         return view('adverts.upublished', compact('adverts'));
     }
 
-    public function publish($id){
+    public function publish($id)
+    {
         $advert = Advert::find($id);
         $advert->status = 1;
 
         $advert->save();
 
         return redirect()->back()->with('status', 'The advert has been published!');
-
     }
 
-    public function unpublish($id){
-         $advert = Advert::find($id);
+    public function unpublish($id)
+    {
+        $advert = Advert::find($id);
 
-         $advert->status = 0;
-         $advert->save();
+        $advert->status = 0;
+        $advert->save();
 
-         return redirect()->back()->with('status', 'The advert has been unpublished!');
-
+        return redirect()->back()->with('status', 'The advert has been unpublished!');
     }
 }

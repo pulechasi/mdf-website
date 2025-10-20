@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\Commander;
-use App\Models\CommanderTerm;
-use Auth;
 use Carbon\Carbon;
+use App\Models\Commander;
+use Illuminate\Http\Request;
+use App\Models\CommanderTerm;
+use Illuminate\Support\Facades\Auth;
 
 class CommandersController extends Controller
 {
@@ -21,13 +21,15 @@ class CommandersController extends Controller
      */
     public function index(Request $request)
     {
-        $commanders = CommanderTerm::where('status', true)
-                        ->orderBy('retirement_date', 'desc')
-                        ->paginate(10);
+        $commanders = CommanderTerm::where(function ($query) {
+            $query->where('retirement_date', '>', now()) // Not retired yet
+                ->orWhereNull('retirement_date'); // Never retired
+        })
+            ->orderBy('retirement_date', 'desc')
+            ->paginate(10);
 
         return view('commanders.index', compact('commanders'))
-                    ->with('i', (request()->input('page', 1) - 1) * 10);
-
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
 
     /**
@@ -55,13 +57,13 @@ class CommandersController extends Controller
             'name' => 'required',
             'commander_roles' => 'required',
             'picture' => 'required|image',
-            'commander_type'=> 'required',
+            'commander_type' => 'required',
             'appointed_date' => 'required'
         ]);
 
         $picture = $request->picture;
-        $picture_new_name = time().$picture->getClientOriginalName();
-        $picture->move('uploads/commanders/',$picture_new_name);
+        $picture_new_name = time() . $picture->getClientOriginalName();
+        $picture->move('uploads/commanders/', $picture_new_name);
 
         $commander = Commander::create([
             'title' => $request->title,
@@ -69,7 +71,7 @@ class CommandersController extends Controller
             'slug' => str_slug($request->name),
             'user_id' => Auth::user()->id,
             'commander_roles' => $request->commander_roles,
-            'picture' => 'uploads/commanders/'.$picture_new_name,
+            'picture' => 'uploads/commanders/' . $picture_new_name,
             'commander_type' => $request->commander_type,
         ]);
 
@@ -79,7 +81,6 @@ class CommandersController extends Controller
             'status' => true
         ]);
         return redirect()->route('commanders')->with('status', 'New commander added!');
-
     }
 
     /**
@@ -121,20 +122,20 @@ class CommandersController extends Controller
             'title' => 'required',
             'name' => 'required',
             'commander_roles' => 'required',
-            'picture' => 'sometimes|image',
+            'picture' => 'required|image',
             'commander_type' => 'required',
             'appointed_date' => 'required',
         ]);
 
         $commander = Commander::find($id);
 
-        if($request->hasFile('picture')){
+        if ($request->hasFile('picture')) {
 
             $picture = $request->picture;
-            $picture_new_name = time().$picture->getClientOriginalName();
-            $picture->move('uploads/commanders/',$picture_new_name);
+            $picture_new_name = time() . $picture->getClientOriginalName();
+            $picture->move('uploads/commanders/', $picture_new_name);
 
-            $commander->picture = 'uploads/commanders/'.$picture_new_name;
+            $commander->picture = 'uploads/commanders/' . $picture_new_name;
         }
 
         // $commander->title = $request->title;
@@ -178,44 +179,78 @@ class CommandersController extends Controller
     }
 
     // Retire commanders
+    // public function retire(Request $request, Commander $commander)
+    // {
+    //     // Validate the input
+    //     // Validate the input
+    //     $request->validate([
+    //         'retirement_date' => 'required|date'
+    //     ]);
+
+    //     $retirementDate = $request->input('retirement_date');
+    //     // Get the current active term
+    //     $currentTerm = $commander->terms()->where('status', true)->first();
+
+    //     if ($currentTerm) {
+    //         $appointedDate = $currentTerm->appointed_date;
+
+    //         // Validate that retirement date is later than the appointed date
+    //         if (Carbon::parse($retirementDate)->lt(Carbon::parse($appointedDate))) {
+    //             return redirect()->back()->withErrors(['retirement_date' => 'Retirement date must be later than the appointed date.']);
+    //         }
+
+    //         // Retire the current term
+    //         $currentTerm->update([
+    //             'retirement_date' => $retirementDate,
+    //             'status' => false
+    //         ]);
+
+    //         // Check if the commander is reappointed
+    //         // Replace this placeholder with actual logic to determine reappointment
+    //         $reappointed = true; // For example, this could be a form input or a business rule
+
+    //         if ($reappointed) {
+    //             // Create a new term for the reappointed commander
+    //             $commander->terms()->create([
+    //                 'appointed_date' => $retirementDate,
+    //                 'status' => true
+    //             ]);
+    //         }
+    //     }
+    //     return redirect()->route('commanders')->with('status', 'Commander retired successfully.');
+    // }
     public function retire(Request $request, Commander $commander)
     {
-        // Validate the input
-     // Validate the input
         $request->validate([
-            'retirement_date' => 'required|date'
+            'retirement_date' => 'required|date',
+            'reappointed' => 'sometimes|boolean' // Add this to your form
         ]);
 
         $retirementDate = $request->input('retirement_date');
-        // Get the current active term
+        $reappointed = $request->input('reappointed', false); // Default to false
         $currentTerm = $commander->terms()->where('status', true)->first();
 
         if ($currentTerm) {
             $appointedDate = $currentTerm->appointed_date;
 
-            // Validate that retirement date is later than the appointed date
             if (Carbon::parse($retirementDate)->lt(Carbon::parse($appointedDate))) {
                 return redirect()->back()->withErrors(['retirement_date' => 'Retirement date must be later than the appointed date.']);
             }
 
-            // Retire the current term
             $currentTerm->update([
                 'retirement_date' => $retirementDate,
                 'status' => false
             ]);
 
-            // Check if the commander is reappointed
-            // Replace this placeholder with actual logic to determine reappointment
-            $reappointed = true; // For example, this could be a form input or a business rule
-
+            // Only create new term if explicitly reappointed
             if ($reappointed) {
-                // Create a new term for the reappointed commander
                 $commander->terms()->create([
-                    'appointed_date' => $retirementDate,
+                    'appointed_date' => $retirementDate, // Or a new date
                     'status' => true
                 ]);
             }
-}
+        }
+
         return redirect()->route('commanders')->with('status', 'Commander retired successfully.');
     }
 
@@ -224,12 +259,11 @@ class CommandersController extends Controller
     {
 
         $commanders = CommanderTerm::where('status', false)
-                                    ->whereNotNull('retirement_date')
-                                    ->orderBy('retirement_date', 'desc')
-                                    ->paginate(10);
+            ->whereNotNull('retirement_date')
+            ->orderBy('retirement_date', 'desc')
+            ->paginate(10);
 
         return view('commanders.retired', compact('commanders'))
-                   ->with('i', (request()->input('page', 1) - 1) * 10);
+            ->with('i', (request()->input('page', 1) - 1) * 10);
     }
-
 }

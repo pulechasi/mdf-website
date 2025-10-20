@@ -21,17 +21,17 @@ class UsersController extends Controller
     public function index(Request $request)
     {
         //
-         $users = User::where([
+        $users = User::where([
             ['name', '!=', NULL],
-            [function($query) use ($request){
-                if(($term = $request->term)){
-                    $query->orWhere('name', 'LIKE', '%'.$term.'%')->get();
+            [function ($query) use ($request) {
+                if (($term = $request->term)) {
+                    $query->orWhere('name', 'LIKE', '%' . $term . '%')->get();
                 }
             }]
-         ])->orderBy('id', 'desc')
-         ->paginate(5);
-         return view('users.index', compact('users'))
-         ->with('i', (request()->input('page', 1)- 1)* 5);
+        ])->orderBy('id', 'desc')
+            ->paginate(5);
+        return view('users.index', compact('users'))
+            ->with('i', (request()->input('page', 1) - 1) * 5);
         // $users = User::paginate(3);
         // return view('users.index', compact('users'));
     }
@@ -58,10 +58,10 @@ class UsersController extends Controller
         //
         $request->validate([
             'name' => 'required',
-            'email'=> 'required|email'
+            'email' => 'required|email'
         ]);
 
-        $user= User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => bcrypt('12345678'),
@@ -117,17 +117,24 @@ class UsersController extends Controller
      */
     public function destroy($id)
     {
-        //
         $user = User::find($id);
 
-        $user->delete();
+        if (!$user) {
+            return redirect()->route('users')->with('error', 'User not found!');
+        }
 
-        $user->profile->delete();
+        // Check if profile exists before deleting
+        if ($user->profile) {
+            $user->profile->delete();
+        }
+
+        $user->delete();
 
         return redirect()->route('users')->with('status', 'User deleted!');
     }
 
-    public function removeAdmin($id){
+    public function removeAdmin($id)
+    {
         $user = User::find($id);
 
         $user->role = 0;
@@ -135,7 +142,8 @@ class UsersController extends Controller
 
         return redirect()->route('users')->with('status', 'User is now an author!');
     }
-    public function makeAdmin($id){
+    public function makeAdmin($id)
+    {
         $user = User::find($id);
 
         $user->role = 1;

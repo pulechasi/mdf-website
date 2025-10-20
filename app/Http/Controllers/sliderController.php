@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SliderSlide;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class SliderController extends Controller
 {
@@ -40,32 +42,37 @@ class SliderController extends Controller
      */
     public function store(Request $request)
     {
-        // Validate the incoming request data (customize this based on your requirements)
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:500',
-            'link_url' => 'max:255',
-            'button_text' => 'required|max:255',
         ]);
 
-        // Process and store the uploaded image
-        $image = $request->file('image');
-        $imageName = $image->getClientOriginalName();
-        $image->storeAs('public/slider_image', $imageName);
+        if ($request->hasFile('image')) {
+            // Generate unique filename
+            $filename = uniqid() . '_' . $request->file('image')->getClientOriginalName();
 
-        // Create a new slider slide record
-        $sliderSlide = SliderSlide::create([
-            'image' => $imageName,
-            'title' => $request->input('title'),
-            'description' => $request->input('description'),
-            'link_url' => $request->input('link_url'),
-            'button_text' => $request->input('button_text'),
-        ]);
+            // Store the file
+            $path = $request->file('image')->storeAs('slider_image', $filename, 'public');
 
-        // Redirect back with a success message
-        return redirect()->route('slides.index')->with('success', 'Slide created successfully');
+            // Verify the file was stored
+            if (!Storage::disk('public')->exists('slider_image/' . $filename)) {
+                return back()->with('error', 'Failed to upload image.');
+            }
+
+            $slide = SliderSlide::create([
+                'image' => $filename, // Store only filename
+                'title' => $request->title,
+                'description' => $request->description,
+                'link_url' => $request->link_url,
+                'button_text' => $request->button_text,
+            ]);
+
+            return redirect()->route('slides.index')->with('success', 'Slide created successfully.');
+        }
+
+        return back()->with('error', 'No image uploaded.');
     }
+
 
     /**
      * Show the form for editing the specified resource.

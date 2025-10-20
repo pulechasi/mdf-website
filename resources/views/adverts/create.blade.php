@@ -1,114 +1,324 @@
 @extends('layouts.app')
 
+@section('page-title', 'Create New Advert')
 
 @section('content')
-    <div class="container">
+    <div class="container-fluid">
         <div class="row justify-content-center">
-            <div class="col-md-10">
-                <div class="card">
-                    <div class="card-header">
-                        <h6>NEW ADVERT</h6>
+            <div class="col-lg-10">
+                <!-- Header -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="h4 mb-1">Create New Advert</h2>
+                                <p class="text-muted mb-0">Add a new advertisement or announcement</p>
+                            </div>
+                            <div>
+                                <a href="{{ route('adverts') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-arrow-left me-2"></i>Back to Adverts
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <form action="{{ route('adverts.store') }}" method="post" enctype="multipart/form-data">
-                            @csrf
+                </div>
 
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label for="title">Title:</label>
-                                </div>
+                <!-- Create Advert Form -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header bg-white">
+                                <h5 class="card-title mb-0">Advert Information</h5>
+                            </div>
+                            <div class="card-body">
+                                <form action="{{ route('adverts.store') }}" method="post" enctype="multipart/form-data">
+                                    @csrf
 
-                                <div class="col-md-8">
-
-                                    <input type="text" id="title" name="title" class="form-control">
-                                    <span class="text-danger"><strong>
+                                    <!-- Title Field -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="title" class="form-label fw-semibold">Advert Title <span
+                                                    class="text-danger">*</span></label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="text" class="form-control @error('title') is-invalid @enderror"
+                                                id="title" name="title" value="{{ old('title') }}"
+                                                placeholder="Enter advert title" required>
                                             @error('title')
-                                                {{ $message }}
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
                                             @enderror
-                                        </strong></span>
+                                        </div>
+                                    </div>
 
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label for="description">Description:</label>
-                                </div>
-
-                                <div class="col-md-8">
-                                    <textarea name="description" id="" cols="5" rows="6" class="form-control">
-                                </textarea>
-                                    <span class="text-danger"><strong>
+                                    <!-- Description Field -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="summernote" class="form-label fw-semibold">Description <span
+                                                    class="text-danger">*</span></label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <textarea name="description" id="summernote" class="form-control @error('description') is-invalid @enderror"
+                                                rows="8" placeholder="Enter advert description...">{{ old('description') }}</textarea>
                                             @error('description')
-                                                {{ $message }}
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
                                             @enderror
-                                        </strong></span>
+                                        </div>
+                                    </div>
 
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label for="due_date">Due date:</label>
-                                </div>
-
-                                <div class="col-md-8">
-
-                                    <input type="date" id="due_date" name="due_date" class="form-control">
-                                    <span class="text-danger"><strong>
+                                    <!-- Due Date Field -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="due_date" class="form-label fw-semibold">Due Date <span
+                                                    class="text-danger">*</span></label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="date"
+                                                class="form-control @error('due_date') is-invalid @enderror" id="due_date"
+                                                name="due_date" value="{{ old('due_date') }}" min="{{ date('Y-m-d') }}">
+                                            <div class="form-text">Select the deadline or expiration date for this advert
+                                            </div>
                                             @error('due_date')
-                                                {{ $message }}
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
                                             @enderror
-                                        </strong></span>
+                                        </div>
+                                    </div>
 
-                                </div>
-                            </div>
-
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label for="operation_type">Select advert type:</label>
-                                </div>
-
-                                <div class="col-md-8">
-                                    <select name="advert_type" id="advert_type" class="form-control">
-                                        <option value=""></option>
-                                        <option value="vacancy">Vacancies</option>
-                                        <option value="tender">Tenders</option>
-
-                                    </select>
-                                    <span class="text-danger"><strong>
+                                    <!-- Advert Type Field -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="advert_type" class="form-label fw-semibold">Advert Type <span
+                                                    class="text-danger">*</span></label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <select name="advert_type" id="advert_type"
+                                                class="form-select @error('advert_type') is-invalid @enderror" required>
+                                                <option value="">Select advert type</option>
+                                                <option value="vacancy"
+                                                    {{ old('advert_type') == 'vacancy' ? 'selected' : '' }}>Vacancies
+                                                </option>
+                                                <option value="tender"
+                                                    {{ old('advert_type') == 'tender' ? 'selected' : '' }}>Tenders</option>
+                                            </select>
                                             @error('advert_type')
-                                                {{ $message }}
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
                                             @enderror
-                                        </strong></span>
+                                        </div>
+                                    </div>
 
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <label for="image">Attach a file:</label>
-                                </div>
-
-                                <div class="col-md-8">
-                                    <input type="file" name="file" id="file" class="form-control">
-                                    <span class="text-danger"><strong>
+                                    <!-- File Upload Field -->
+                                    <div class="row mb-4">
+                                        <div class="col-md-3">
+                                            <label for="file" class="form-label fw-semibold">Attach File</label>
+                                        </div>
+                                        <div class="col-md-9">
+                                            <input type="file" class="form-control @error('file') is-invalid @enderror"
+                                                id="file" name="file" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png">
+                                            <div class="form-text">Supported formats: PDF, DOC, DOCX, JPG, PNG. Maximum file
+                                                size: 10MB</div>
                                             @error('file')
-                                                {{ $message }}
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
                                             @enderror
-                                        </strong></span>
+                                        </div>
+                                    </div>
 
+                                    <!-- Form Actions -->
+                                    <div class="row mt-5">
+                                        <div class="col-md-9 offset-md-3">
+                                            <div class="d-flex gap-2">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save me-2"></i>Save Advert
+                                                </button>
+                                                <button type="reset" class="btn btn-outline-secondary">
+                                                    <i class="fas fa-undo me-2"></i>Reset
+                                                </button>
+                                                <a href="{{ route('adverts') }}" class="btn btn-outline-danger">
+                                                    <i class="fas fa-times me-2"></i>Cancel
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Tips -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-lightbulb me-2"></i>Advert Guidelines
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-heading text-primary me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Clear Titles</h6>
+                                                <p class="text-muted mb-0 small">Use descriptive and concise titles</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-calendar-day text-success me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Realistic Deadlines</h6>
+                                                <p class="text-muted mb-0 small">Set appropriate due dates</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-file-alt text-warning me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Proper Documentation</h6>
+                                                <p class="text-muted mb-0 small">Attach relevant supporting files</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div class="row mb-3">
-
-                                <div class="col-md-8 text-center">
-                                    <button type="submit" class="btn btn-success"><i class="fa fa-save"></i> SAVE</button>
+                <!-- Important Notice -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card border-warning">
+                            <div class="card-header bg-warning text-white">
+                                <h6 class="card-title mb-0">
+                                    <i class="fas fa-exclamation-circle me-2"></i>Important Notice
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-eye text-primary me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Publication Status</h6>
+                                                <p class="text-muted mb-0 small">New adverts are published immediately upon
+                                                    creation.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-start">
+                                            <i class="fas fa-clock text-danger me-3 mt-1"></i>
+                                            <div>
+                                                <h6 class="mb-1">Due Date Reminders</h6>
+                                                <p class="text-muted mb-0 small">Expired adverts are automatically marked
+                                                    and can be unpublished.</p>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
+
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .card-header {
+            border-bottom: 1px solid #e9ecef;
+            padding: 1rem 1.25rem;
+        }
+
+        .form-label {
+            margin-bottom: 0.5rem;
+        }
+
+        .btn {
+            border-radius: 0.375rem;
+        }
+
+        .invalid-feedback {
+            display: block;
+        }
+
+        .form-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Summernote initialization for description
+            $('#summernote').summernote({
+                placeholder: 'Enter advert description...',
+                tabsize: 2,
+                height: 200,
+                toolbar: [
+                    ['style', ['style']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                    ['insert', ['link']],
+                    ['view', ['fullscreen', 'codeview', 'help']]
+                ]
+            });
+
+            // Set min date for due date to today
+            const dueDateInput = document.getElementById('due_date');
+            if (dueDateInput && !dueDateInput.value) {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                dueDateInput.min = tomorrow.toISOString().split('T')[0];
+            }
+
+            // File type validation
+            const fileInput = document.getElementById('file');
+            if (fileInput) {
+                fileInput.addEventListener('change', function() {
+                    const file = this.files[0];
+                    if (file) {
+                        const validTypes = ['application/pdf', 'application/msword',
+                            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            'image/jpeg', 'image/jpg', 'image/png'
+                        ];
+                        const maxSize = 10 * 1024 * 1024; // 10MB
+
+                        if (!validTypes.includes(file.type)) {
+                            alert('Please select a valid file type (PDF, DOC, DOCX, JPG, PNG).');
+                            this.value = '';
+                            return;
+                        }
+
+                        if (file.size > maxSize) {
+                            alert('File size must be less than 10MB.');
+                            this.value = '';
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 @endsection
