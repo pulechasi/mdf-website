@@ -58,11 +58,12 @@
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background: #343a40;
+            /* background: #343a40; */
             color: #fff;
             transition: all var(--transition-speed);
             height: 100vh;
             position: fixed;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
             left: 0;
             top: 0;
             z-index: 1000;

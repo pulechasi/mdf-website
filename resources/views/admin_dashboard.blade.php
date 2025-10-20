@@ -35,9 +35,9 @@
                             <div class="row align-items-center">
                                 <div class="col-8">
                                     <h6 class="card-title text-muted mb-2">TOTAL POSTS</h6>
-                                    <h3 class="mb-0">156</h3>
+                                    <h3 class="mb-0">{{ $postsCount }}</h3>
                                     <small class="text-success">
-                                        <i class="fas fa-arrow-up me-1"></i>12% increase
+                                        <i class="fas fa-arrow-up me-1"></i>33% increase
                                     </small>
                                 </div>
                                 <div class="col-4 text-end">
@@ -56,7 +56,7 @@
                             <div class="row align-items-center">
                                 <div class="col-8">
                                     <h6 class="card-title text-muted mb-2">ACTIVE OPERATIONS</h6>
-                                    <h3 class="mb-0">8</h3>
+                                    <h3 class="mb-0">{{ $operationsCount }}</h3>
                                     <small class="text-warning">
                                         <i class="fas fa-clock me-1"></i>3 ongoing
                                     </small>
@@ -77,9 +77,9 @@
                             <div class="row align-items-center">
                                 <div class="col-8">
                                     <h6 class="card-title text-muted mb-2">SYSTEM USERS</h6>
-                                    <h3 class="mb-0">42</h3>
+                                    <h3 class="mb-0">{{ $usersCount }}</h3>
                                     <small class="text-info">
-                                        <i class="fas fa-user me-1"></i>5 online
+                                        <i class="fas fa-user me-1"></i>2 online
                                     </small>
                                 </div>
                                 <div class="col-4 text-end">
@@ -98,7 +98,7 @@
                             <div class="row align-items-center">
                                 <div class="col-8">
                                     <h6 class="card-title text-muted mb-2">PENDING TASKS</h6>
-                                    <h3 class="mb-0">15</h3>
+                                    <h3 class="mb-0">6</h3>
                                     <small class="text-danger">
                                         <i class="fas fa-exclamation me-1"></i>3 urgent
                                     </small>

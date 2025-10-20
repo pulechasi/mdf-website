@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Operation;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -26,8 +29,12 @@ class HomeController extends Controller
         return view('user_dashboard');
     }
 
-    public function adminHome(){
+    public function adminHome()
+    {
 
-        return view('admin_dashboard');
+        $postsCount = Post::all()->count();
+        $usersCount = User::all()->count();
+        $operationsCount = Operation::all()->count();
+        return view('admin_dashboard', compact('postsCount', 'usersCount', 'operationsCount'));
     }
 }
