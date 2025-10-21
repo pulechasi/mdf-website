@@ -116,9 +116,9 @@
                                             <select name="commander_type" id="commander_type"
                                                 class="form-select @error('commander_type') is-invalid @enderror" required>
                                                 <option value="">Select commander type</option>
-                                                <option value="Chief Of Defence Forces"
-                                                    {{ old('commander_type') == 'Chief Of Defence Forces' ? 'selected' : '' }}>
-                                                    Chief Of Defence Forces</option>
+                                                <option value="Chief Of Defence Force"
+                                                    {{ old('commander_type') == 'Chief Of Defence Force' ? 'selected' : '' }}>
+                                                    Chief Of Defence Force</option>
                                                 <option value="MDF Commander"
                                                     {{ old('commander_type') == 'MDF Commander' ? 'selected' : '' }}>MDF
                                                     Commander</option>

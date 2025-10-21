@@ -87,7 +87,7 @@
     <section class="bg-gray " data-jarallax data-speed="0.2">
         <div class="container">
             <div class="row">
-                <p class="pb-5"> <span class="display-1">“ 25 years of Service, Embracing the Philosophy of Soldiers
+                <p class="pb-5"> <span class="display-1">“Embracing the Philosophy of Soldiers
                         First,”</span><span class="h4"> General Paul Velentino Phiri, MSM, psc, ndc, PhD.</span></p>
                 <div class="col-lg-5 pt-5">
                     <img src="{{ asset('app/img/Who we are.jpg') }}" alt="" />

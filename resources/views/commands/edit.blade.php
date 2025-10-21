@@ -44,12 +44,12 @@
                                             <select name="rank" id="rank"
                                                 class="form-select @error('rank') is-invalid @enderror" required>
                                                 <option value="">Select military rank</option>
-                                                <option value="Chief Of Defence Forces"
-                                                    {{ old('rank', $command->rank) == 'Chief Of Defence Forces' ? 'selected' : '' }}>
-                                                    Chief Of Defence Forces</option>
-                                                <option value="Deputy Chief of Defence Forces"
-                                                    {{ old('rank', $command->rank) == 'Deputy Chief of Defence Forces' ? 'selected' : '' }}>
-                                                    Deputy Chief of Defence Forces</option>
+                                                <option value="Chief Of Defence Force"
+                                                    {{ old('rank', $command->rank) == 'Chief Of Defence Force' ? 'selected' : '' }}>
+                                                    Chief Of Defence Force</option>
+                                                <option value="Deputy Chief of Defence Force"
+                                                    {{ old('rank', $command->rank) == 'Deputy Chief of Defence Force' ? 'selected' : '' }}>
+                                                    Deputy Chief of Defence Force</option>
                                                 <option value="Commander"
                                                     {{ old('rank', $command->rank) == 'Commander' ? 'selected' : '' }}>
                                                     Commander</option>
