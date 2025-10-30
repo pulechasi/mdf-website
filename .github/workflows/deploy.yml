@@ -10,23 +10,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Important for git push later
 
-      # --- SETUP NODE & BUILD FRONTEND ---
+      # 2. Setup Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # or your version
+          node-version: '20'
           cache: 'npm'
 
+      # 3. Install dependencies
       - name: Install frontend dependencies
         run: npm ci
 
+      # 4. Build assets
       - name: Build frontend assets
         run: npm run build
 
-      # --- DEPLOY BUILT FILES TO SERVER ---
+      # 5. Commit built assets back to repo (so server gets them)
+      - name: Commit built assets
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add public/build/ public/mix-manifest.json -f || echo "No build files to add"
+          git commit -m "chore: build assets for deployment" || echo "No changes to commit"
+          git push origin main || echo "Push failed (non-critical)"
+
+      # 6. Deploy to server
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -35,44 +49,44 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           port: ${{ secrets.SSH_PORT || '22' }}
           timeout: 60s
-          command_timeout: 10m
+          command_timeout: 15m
           script: |
-            echo "🚀 Starting deployment on $(date)"
-            cd /home/mdf/public_html || { echo "❌ Failed to cd"; exit 1; }
+            echo "Starting deployment on $(date)"
 
-            # Enable maintenance
+            # Navigate to project
+            cd /home/mdf/public_html || { echo "Failed to cd"; exit 1; }
+
+            # Maintenance mode
             php artisan down || true
 
-            # Backup current release (optional)
-            # mv public/build public/build_backup_$(date +%s) || true
+            # Pull latest (includes built assets)
+            git pull origin main || { echo "Git pull failed"; exit 1; }
 
-            # Pull latest code (includes built assets)
-            git pull origin main || { echo "❌ Git pull failed"; exit 1; }
+            # Install PHP deps
+            composer install --no-dev --optimize-autoloader --no-interaction || { echo "Composer failed"; exit 1; }
 
-            # Composer
-            composer install --no-dev --optimize-autoloader --no-interaction || { echo "❌ Composer failed"; exit 1; }
+            # Run migrations
+            php artisan migrate --force || { echo "Migrations failed"; exit 1; }
 
-            # Migrations
-            php artisan migrate --force || { echo "❌ Migrate failed"; exit 1; }
-
-            # Clear & cache
+            # Clear caches
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
             php artisan cache:clear
 
+            # Optimize
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
 
-            # Queue restart
+            # Restart queues
             php artisan queue:restart
 
             # Permissions
             chmod -R 775 storage bootstrap/cache
             chown -R www-data:www-data storage bootstrap/cache
 
-            # Disable maintenance
+            # Go live
             php artisan up
 
-            echo "🎉 Deployment completed on $(date)"
+            echo "Deployment completed successfully on $(date)"
