@@ -6,18 +6,27 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Test Server Connectivity
-        run: |
-          echo "Testing connectivity to server..."
-          ping -c 3 ${{ secrets.SERVER_HOST }} || echo "Ping failed, but continuing..."
+      # --- SETUP NODE & BUILD FRONTEND ---
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # or your version
+          cache: 'npm'
 
+      - name: Install frontend dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      # --- DEPLOY BUILT FILES TO SERVER ---
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -29,62 +38,41 @@ jobs:
           command_timeout: 10m
           script: |
             echo "🚀 Starting deployment on $(date)"
-            echo "Current directory: $(pwd)"
-            echo "Current user: $(whoami)"
-            
-            # Navigate to project directory
-            cd /home/mdf/public_html || { echo "❌ Failed to navigate to /home/mdf/public_html"; exit 1; }
-            
-            echo "📂 Current directory: $(pwd)"
-            echo "📋 Directory contents:"
-            ls -la
+            cd /home/mdf/public_html || { echo "❌ Failed to cd"; exit 1; }
 
-            # Enable maintenance mode
-            echo "🔧 Enabling maintenance mode..."
+            # Enable maintenance
             php artisan down || true
 
-            # Pull latest changes
-            echo "📥 Pulling latest changes from git..."
+            # Backup current release (optional)
+            # mv public/build public/build_backup_$(date +%s) || true
+
+            # Pull latest code (includes built assets)
             git pull origin main || { echo "❌ Git pull failed"; exit 1; }
 
-            # Install/Update dependencies
-            echo "📦 Installing Composer dependencies..."
-            composer install --no-dev --optimize-autoloader --no-interaction || { echo "❌ Composer install failed"; exit 1; }
+            # Composer
+            composer install --no-dev --optimize-autoloader --no-interaction || { echo "❌ Composer failed"; exit 1; }
 
-            # Run migrations
-            echo "🗄️ Running database migrations..."
-            php artisan migrate --force || { echo "❌ Migrations failed"; exit 1; }
+            # Migrations
+            php artisan migrate --force || { echo "❌ Migrate failed"; exit 1; }
 
-            # Clear all caches first
-            echo "🧹 Clearing caches..."
-            php artisan cache:clear
+            # Clear & cache
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
+            php artisan cache:clear
 
-            # Then optimize
-            echo "⚡ Optimizing application..."
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-            php artisan optimize
 
-            # Build frontend assets
-            echo "🎨 Building frontend assets..."
-            npm ci --production || { echo "❌ NPM install failed"; exit 1; }
-            npm run build || { echo "❌ NPM build failed"; exit 1; }
-
-            # Restart queue workers if you use them
-            echo "🔄 Restarting queue workers..."
+            # Queue restart
             php artisan queue:restart
 
-            # Set permissions
-            echo "🔐 Setting permissions..."
+            # Permissions
             chmod -R 775 storage bootstrap/cache
             chown -R www-data:www-data storage bootstrap/cache
 
-            # Disable maintenance mode
-            echo "✅ Disabling maintenance mode..."
+            # Disable maintenance
             php artisan up
 
-            echo "🎉 Deployment completed successfully on $(date)"
+            echo "🎉 Deployment completed on $(date)"

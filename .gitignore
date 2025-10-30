@@ -13,3 +13,7 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+
+# ✅ KEEP BUILT ASSETS (CRITICAL!)
+!/public/build/
+!/public/build/manifest.json
