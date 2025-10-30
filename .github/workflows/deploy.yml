@@ -10,37 +10,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Important for git push later
 
-      # 2. Setup Node.js
-      - name: Setup Node.js
+      - name: Use Node 18
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
           cache: 'npm'
 
-      # 3. Install dependencies
-      - name: Install frontend dependencies
-        run: npm ci
+      - name: Install dependencies
+        run: npm install
 
-      # 4. Build assets
       - name: Build frontend assets
         run: npm run build
 
-      # 5. Commit built assets back to repo (so server gets them)
-      - name: Commit built assets
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git add public/build/ public/mix-manifest.json -f || echo "No build files to add"
-          git commit -m "chore: build assets for deployment" || echo "No changes to commit"
-          git push origin main || echo "Push failed (non-critical)"
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: |
+            public/css
+            public/js
+            public/mix-manifest.json
 
-      # 6. Deploy to server
       - name: Deploy to Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -51,42 +44,20 @@ jobs:
           timeout: 60s
           command_timeout: 15m
           script: |
-            echo "Starting deployment on $(date)"
-
-            # Navigate to project
             cd /home/mdf/public_html || { echo "Failed to cd"; exit 1; }
-
-            # Maintenance mode
             php artisan down || true
-
-            # Pull latest (includes built assets)
             git pull origin main || { echo "Git pull failed"; exit 1; }
-
-            # Install PHP deps
             composer install --no-dev --optimize-autoloader --no-interaction || { echo "Composer failed"; exit 1; }
-
-            # Run migrations
             php artisan migrate --force || { echo "Migrations failed"; exit 1; }
-
-            # Clear caches
             php artisan config:clear
             php artisan route:clear
             php artisan view:clear
             php artisan cache:clear
-
-            # Optimize
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
-
-            # Restart queues
             php artisan queue:restart
-
-            # Permissions
             chmod -R 775 storage bootstrap/cache
             chown -R www-data:www-data storage bootstrap/cache
-
-            # Go live
             php artisan up
-
             echo "Deployment completed successfully on $(date)"
