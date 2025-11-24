@@ -15,9 +15,15 @@
                                 <p class="text-muted mb-0">Update commander information</p>
                             </div>
                             <div>
-                                <a href="{{ route('commanders') }}" class="btn btn-outline-secondary">
-                                    <i class="fas fa-arrow-left me-2"></i>Back to Commanders
-                                </a>
+                                @if (isset($isRetired) && $isRetired)
+                                    <a href="{{ route('commanders.retired') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Retired Commanders
+                                    </a>
+                                @else
+                                    <a href="{{ route('commanders') }}" class="btn btn-outline-secondary">
+                                        <i class="fas fa-arrow-left me-2"></i>Back to Commanders
+                                    </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -115,6 +121,10 @@
                                         <div class="col-md-9">
                                             @php
                                                 $currentTerm = $commander->terms()->where('status', true)->first();
+                                                // If no active term, get the retired term
+                                                if (!$currentTerm) {
+                                                    $currentTerm = $commander->terms()->where('status', false)->whereNotNull('retirement_date')->latest('retirement_date')->first();
+                                                }
                                                 $appointedDate = old(
                                                     'appointed_date',
                                                     $currentTerm->appointed_date ?? '',
@@ -215,9 +225,15 @@
                                                 <button type="reset" class="btn btn-outline-secondary">
                                                     <i class="fas fa-undo me-2"></i>Reset Changes
                                                 </button>
-                                                <a href="{{ route('commanders') }}" class="btn btn-outline-danger">
-                                                    <i class="fas fa-times me-2"></i>Cancel
-                                                </a>
+                                                @if (isset($isRetired) && $isRetired)
+                                                    <a href="{{ route('commanders.retired') }}" class="btn btn-outline-danger">
+                                                        <i class="fas fa-times me-2"></i>Cancel
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('commanders') }}" class="btn btn-outline-danger">
+                                                        <i class="fas fa-times me-2"></i>Cancel
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>
@@ -263,7 +279,11 @@
                                             <i class="fas fa-user-shield text-warning me-3 mt-1"></i>
                                             <div>
                                                 <h6 class="mb-1">Status</h6>
-                                                <span class="badge bg-success">Active</span>
+                                                @if (isset($isRetired) && $isRetired)
+                                                    <span class="badge bg-warning">Retired</span>
+                                                @else
+                                                    <span class="badge bg-success">Active</span>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

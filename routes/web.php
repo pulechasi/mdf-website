@@ -179,6 +179,8 @@ Route::middleware(['auth'])->group(function () {
     ->middleware('admin');
     Route::put('/commanders/retire/{commander}',[CommandersController::class, 'retire'])->name('commanders.retire')
     ->middleware('admin');
+    Route::put('/commanders/unretire/{commander}',[CommandersController::class, 'unretire'])->name('commanders.unretire')
+    ->middleware('admin');
     // Route::get('/commanders/retired', [CommandersController::class, 'retiredCommanders'])->name('commanders.retired')
     // ->middleware('admin');
     Route::get('/commanders/retired', [CommandersController::class, 'showRetiredCommanders'])->name('commanders.retired')

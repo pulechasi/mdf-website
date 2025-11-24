@@ -104,8 +104,13 @@ class CommandersController extends Controller
     {
         //
         $commander = Commander::find($id);
+        
+        // Check if commander is retired (has retired term and no active term)
+        $retiredTerm = $commander->terms()->where('status', false)->whereNotNull('retirement_date')->latest('retirement_date')->first();
+        $activeTerm = $commander->terms()->where('status', true)->first();
+        $isRetired = $retiredTerm && !$activeTerm;
 
-        return view('commanders.edit', compact('commander'));
+        return view('commanders.edit', compact('commander', 'isRetired'));
     }
 
     /**
@@ -122,7 +127,7 @@ class CommandersController extends Controller
             'title' => 'required',
             'name' => 'required',
             'commander_roles' => 'required',
-            'picture' => 'required|image',
+            'picture' => 'nullable|image',
             'commander_type' => 'required',
             'appointed_date' => 'required',
         ]);
@@ -152,13 +157,25 @@ class CommandersController extends Controller
             'commander_roles' => $request->commander_roles,
             'commander_type' => $request->commander_type,
         ]);
-        // Update the current active term
-        $currentTerm = $commander->terms()->where('status', true)->first();
-        if ($currentTerm) {
-            $currentTerm->update([
+        // Update the term - check if commander is retired
+        $retiredTerm = $commander->terms()->where('status', false)->whereNotNull('retirement_date')->latest('retirement_date')->first();
+        $activeTerm = $commander->terms()->where('status', true)->first();
+        
+        // If there's a retired term and no active term, update the retired term
+        // Otherwise, update the active term if it exists
+        $termToUpdate = $retiredTerm && !$activeTerm ? $retiredTerm : $activeTerm;
+        
+        if ($termToUpdate) {
+            $termToUpdate->update([
                 'appointed_date' => $request->appointed_date
             ]);
         }
+        
+        // Redirect based on whether commander is retired
+        if ($retiredTerm && !$activeTerm) {
+            return redirect()->route('commanders.retired')->with('status', 'Retired commander updated!');
+        }
+        
         return redirect()->route('commanders')->with('status', 'Commander updated!');
     }
 
@@ -254,6 +271,43 @@ class CommandersController extends Controller
         return redirect()->route('commanders')->with('status', 'Commander retired successfully.');
     }
 
+    /**
+     * Unretire a commander (reverse retirement)
+     *
+     * @param  Commander  $commander
+     * @return \Illuminate\Http\Response
+     */
+    public function unretire(Commander $commander)
+    {
+        // Find the retired term
+        $retiredTerm = $commander->terms()
+            ->where('status', false)
+            ->whereNotNull('retirement_date')
+            ->latest('retirement_date')
+            ->first();
+
+        if (!$retiredTerm) {
+            return redirect()->route('commanders.retired')
+                ->with('error', 'No retired term found for this commander.');
+        }
+
+        // Check if there's already an active term
+        $activeTerm = $commander->terms()->where('status', true)->first();
+        
+        if ($activeTerm) {
+            return redirect()->route('commanders.retired')
+                ->with('error', 'Commander already has an active term. Cannot unretire.');
+        }
+
+        // Unretire the commander by reactivating the term
+        $retiredTerm->update([
+            'status' => true,
+            'retirement_date' => null
+        ]);
+
+        return redirect()->route('commanders.retired')
+            ->with('status', 'Commander has been unretired and is now active again.');
+    }
 
     public function showRetiredCommanders(Request $request)
     {

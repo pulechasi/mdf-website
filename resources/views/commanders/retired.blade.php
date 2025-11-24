@@ -91,6 +91,9 @@
                                             <th>Type</th>
                                             <th>Retirement Date</th>
                                             <th>Service Period</th>
+                                            @if (Auth::user()->role)
+                                                <th class="text-end pe-4">Actions</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -136,6 +139,29 @@
                                                         {{ $serviceYears }}y {{ $serviceMonths }}m
                                                     </small>
                                                 </td>
+                                                @if (Auth::user()->role)
+                                                    <td class="text-end pe-4">
+                                                        <div class="btn-group" role="group">
+                                                            <a href="{{ route('commanders.edit', $term->commander->id) }}"
+                                                                class="btn btn-outline-primary btn-sm"
+                                                                title="Edit Commander">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                            <form action="{{ route('commanders.unretire', $term->commander->id) }}" 
+                                                                method="POST" 
+                                                                class="d-inline"
+                                                                onsubmit="return confirm('Are you sure you want to unretire this commander? They will become active again.');">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <button type="submit" 
+                                                                    class="btn btn-outline-success btn-sm"
+                                                                    title="Unretire Commander">
+                                                                    <i class="fas fa-undo"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -359,6 +385,7 @@
             const searchInput = document.getElementById('searchInput');
             const clearSearch = document.getElementById('clearSearch');
             const searchButton = document.getElementById('searchButton');
+            const columnCount = {{ Auth::user()->role ? 8 : 7 }};
 
             function performSearch() {
                 const searchText = searchInput.value.toLowerCase().trim();
@@ -386,7 +413,7 @@
                         const tr = document.createElement('tr');
                         tr.id = 'noResults';
                         tr.innerHTML =
-                            `<td colspan="7" class="text-center py-4 text-muted"><i class="fas fa-search me-2"></i>No retired commanders found matching your search</td>`;
+                            `<td colspan="${columnCount}" class="text-center py-4 text-muted"><i class="fas fa-search me-2"></i>No retired commanders found matching your search</td>`;
                         tbody.appendChild(tr);
                     }
                 } else if (noResultsRow) {

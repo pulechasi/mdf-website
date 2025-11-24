@@ -20,10 +20,14 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          echo "📦 Installing npm dependencies..."
+          npm ci || { echo "❌ NPM install failed"; exit 1; }
 
       - name: Build frontend assets
-        run: npm run build
+        run: |
+          echo "🎨 Building frontend assets..."
+          npm run build || { echo "❌ NPM build failed"; exit 1; }
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
